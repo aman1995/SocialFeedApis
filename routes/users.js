@@ -40,7 +40,7 @@ router.get('/:username', async function (req, res, next) {
     
     const profile = {
       username: user.username,
-      follower: [],
+      followers: [],
       following: [],
       posts: []
     };
@@ -66,7 +66,7 @@ router.get('/:username', async function (req, res, next) {
         }
         postsArr.push(post);
       }
-      profile.follower = followersArr;
+      profile.followers = followersArr;
       profile.following = followingArr;
       profile.posts = postsArr;
 
