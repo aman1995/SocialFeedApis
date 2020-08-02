@@ -40,10 +40,10 @@ router.get('/all-posts/:usernameA', async function (req, res, next) {
   }
   else {
     let postsArr = [];
-    promise = new Promise(async (resolve) => {
+    let promise = new Promise(async (resolve) => {
       for await (const doc of Post.find({ username: user._id })) {
         let post = {
-          postId: doc._id,
+          postId: doc.postId,
           imageUrl: doc.imageUrl,
           caption: doc.caption,
           upvotes: doc.upvotes,

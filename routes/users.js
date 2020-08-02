@@ -47,7 +47,7 @@ router.get('/:username', async function (req, res, next) {
     const followingArr = [];
     const followersArr = [];
     const postsArr = [];
-    promise = new Promise(async (resolve) => {
+    let promise = new Promise(async (resolve) => {
 
       for await (const doc of Follow.find({ following: user._id }).populate('follower'))
         followersArr.push(doc.follower.username);
@@ -59,7 +59,7 @@ router.get('/:username', async function (req, res, next) {
 
       for await (const doc of Post.find({ username: user._id })) {
         let post = {
-          postId: doc._id,
+          postId: doc.postId,
           imageUrl: doc.imageUrl,
           caption: doc.caption,
           upvotes: doc.upvotes,

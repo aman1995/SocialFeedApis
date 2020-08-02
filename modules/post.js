@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const {connection} = require('../config/db');
 Joi.objectId = require('joi-objectid')(Joi)
 var {User} = require('../modules/user');
 const postSchema = new mongoose.Schema({
-
+    postId:{
+        type:Number,
+        unique:true,
+        index:true
+    },
     caption:{
         type:String
     },
@@ -22,6 +27,7 @@ const postSchema = new mongoose.Schema({
     }
 })
 
+postSchema.plugin(autoIncrement.plugin, { model: 'Post', field: 'postId' });
 const Post = mongoose.model('Post', postSchema);
 
 const validate = ((post)=>{
