@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var { Post, validate } = require('../modules/post');
 var { User } = require('../modules/user');
+var { Follow } = require('../modules/follow');
 var { MESSAGES } = require('../utility/constants');
 
 //Create an Post
@@ -20,7 +21,7 @@ router.post('/create-post/:username', async function (req, res, next) {
     let post = new Post({
       caption: req.body.caption,
       imageUrl: req.body.imageUrl,
-      username: user._id
+      userId: user._id
     });
 
     await post.save();
@@ -28,7 +29,7 @@ router.post('/create-post/:username', async function (req, res, next) {
   }
 });
 
-//Get all posts by user
+//Get all posts whom user is following
 router.get('/all-posts/:usernameA', async function (req, res, next) {
   const user = await User.findOne({ username: req.params.usernameA });
 
@@ -39,23 +40,44 @@ router.get('/all-posts/:usernameA', async function (req, res, next) {
     });
   }
   else {
-    let postsArr = [];
-    let promise = new Promise(async (resolve) => {
-      for await (const doc of Post.find({ username: user._id })) {
-        let post = {
-          postId: doc.postId,
-          imageUrl: doc.imageUrl,
-          caption: doc.caption,
-          upvotes: doc.upvotes,
-        }
-        postsArr.push(post);
-      }
-      resolve(postsArr);
-    });
-    promise.then((postArr) => {
-      res.status(200).send(postArr);
+    let followingArr = [];
+    for await (const doc of Follow.find({ follower: user._id })) {
+      followingArr.push(doc.following);
+    }
+
+    let promisesArr = [];
+    followingArr.forEach((following) => {
+      promisesArr.push(getPosts(following));
+    })
+
+    let obj = [];
+    Promise.all(promisesArr).then((postsArr) => {
+      postsArr.forEach((posts) => {
+        posts.forEach((post) => {
+          obj.push(post);
+        })
+      })
+    }).then(() => {
+      res.status(200).send(obj);
     })
   }
 })
+
+//get posts asynchronously
+function getPosts(following) {
+  return new Promise(async (resolve) => {
+    let postsArr = [];
+    for await (const doc of Post.find({ userId: following })) {
+      let post = {
+        postId: doc.postId,
+        imageUrl: doc.imageUrl,
+        caption: doc.caption,
+        upvotes: doc.upvotes,
+      }
+      postsArr.push(post);
+    }
+    resolve(postsArr);
+  })
+}
 
 module.exports = router;

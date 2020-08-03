@@ -57,7 +57,7 @@ router.get('/:username', async function (req, res, next) {
         followingArr.push(doc.following.username);
 
 
-      for await (const doc of Post.find({ username: user._id })) {
+      for await (const doc of Post.find({ userId: user._id })) {
         let post = {
           postId: doc.postId,
           imageUrl: doc.imageUrl,
